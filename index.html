@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#1a0a2e" />
   <title>Associació de Teatre</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link id="dynamicFont" rel="stylesheet" href="" />
 
   <style>
     :root {
@@ -364,7 +365,6 @@
 <div class="tabs" id="mainTabs" style="display:none">
   <button class="tab active" onclick="switchTab('tasks')" id="tab-tasks"><span>✅</span> Tasques</button>
   <button class="tab" onclick="switchTab('calendar')" id="tab-calendar"><span>📅</span> Calendari</button>
-  <button class="tab" onclick="switchTab('migrate')" id="tab-migrate"><span>🔄</span> Migrar</button>
   <button class="tab" onclick="switchTab('admin')" id="tab-admin" style="display:none"><span>👑</span> Admin</button>
 </div>
 
@@ -407,38 +407,12 @@
     <div class="cal-event-list" id="calEventList"></div>
   </div>
 
-  <!-- MIGRAR -->
-  <div class="section" id="section-migrate">
-    <div class="section-header" style="margin-bottom:8px">
-      <div class="section-title">Migrar any</div>
-    </div>
-    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
-      Desplaça totes les tasques i actes al nou any mantenint la proporció respecte al <strong style="color:var(--accent)">Dijous Sant</strong>.
-    </p>
-    <div id="easterCards" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
-    <div style="background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid rgba(255,255,255,0.06);margin-bottom:16px">
-      <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;font-weight:500">Selecciona l'any destí</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:20px">
-        <button class="cal-btn" onclick="changeTargetYear(-1)">‹</button>
-        <div style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="targetYearDisplay"></div>
-        <button class="cal-btn" onclick="changeTargetYear(1)">›</button>
-      </div>
-      <div id="migrationPreview" style="font-size:0.82rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:18px"></div>
-      <button class="btn btn-primary" id="btnMigrate" style="width:100%;padding:16px;font-size:1rem" onclick="openMigrateConfirm()" disabled>
-        🔄 Migrar al <span id="btnYearLabel"></span>
-      </button>
-    </div>
-    <div style="background:rgba(232,184,109,0.06);border:1px solid rgba(232,184,109,0.2);border-radius:14px;padding:14px 16px">
-      <div style="font-size:0.78rem;color:var(--accent);font-weight:500;margin-bottom:6px">ℹ️ Com funciona</div>
-      <div style="font-size:0.78rem;color:var(--muted);line-height:1.7">Es calcula la diferència de dies entre el Dijous Sant de l'any base i el de l'any destí. Totes les dates es desplacen aquest nombre de dies. Les tasques completades no es migren.</div>
-    </div>
-  </div>
-
   <!-- ADMIN -->
   <div class="section" id="section-admin">
-    <div style="display:flex;gap:8px;margin-bottom:20px">
-      <button class="filter-chip active" onclick="switchAdminTab('users',this)">👥 Usuaris</button>
-      <button class="filter-chip" onclick="switchAdminTab('settings',this)">⚙️ Configuració</button>
+    <div style="display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;scrollbar-width:none">
+      <button class="filter-chip active" onclick="switchAdminTab('users',this)" style="flex-shrink:0">👥 Usuaris</button>
+      <button class="filter-chip" onclick="switchAdminTab('settings',this)" style="flex-shrink:0">⚙️ Config</button>
+      <button class="filter-chip" onclick="switchAdminTab('migrate',this)" style="flex-shrink:0">🔄 Migrar</button>
     </div>
 
     <!-- USUARIS -->
@@ -501,11 +475,70 @@
         <div class="field" style="margin-bottom:0"><label>Email de contacte</label><input id="cfg-email" type="email" placeholder="info@associacio.cat" /></div>
       </div>
 
+      <!-- LOGOTIP -->
+      <div style="background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid rgba(255,255,255,0.06);margin-bottom:12px">
+        <div style="font-size:0.75rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px">🖼 Logotip</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+          <div id="logoPreview" style="width:64px;height:64px;border-radius:16px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:2rem;border:2px dashed rgba(255,255,255,0.1);overflow:hidden">🎭</div>
+          <div style="flex:1">
+            <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;line-height:1.5">Puja una imatge o escriu un emoji com a logotip</div>
+            <input type="file" id="cfg-logoFile" accept="image/*" style="display:none" onchange="handleLogoUpload(this)" />
+            <button onclick="document.getElementById('cfg-logoFile').click()" class="btn btn-ghost" style="padding:8px 14px;font-size:0.8rem;flex:none;margin-bottom:6px">📁 Pujar imatge</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>O escriu un emoji</label>
+          <input id="cfg-logoEmoji" type="text" placeholder="🎭" maxlength="4" style="font-size:1.5rem;text-align:center;letter-spacing:4px" oninput="previewEmoji(this.value)" />
+        </div>
+      </div>
+
+      <!-- TIPOGRAFIA -->
+      <div style="background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid rgba(255,255,255,0.06);margin-bottom:20px">
+        <div style="font-size:0.75rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px">✍️ Tipografia</div>
+        <div class="field" style="margin-bottom:0">
+          <label>Font dels títols</label>
+          <select id="cfg-font" onchange="previewFont(this.value)">
+            <option value="Playfair Display">Playfair Display (clàssica)</option>
+            <option value="Cormorant Garamond">Cormorant Garamond (elegant)</option>
+            <option value="Bebas Neue">Bebas Neue (impactant)</option>
+            <option value="Josefin Sans">Josefin Sans (moderna)</option>
+            <option value="Libre Baskerville">Libre Baskerville (literària)</option>
+            <option value="Abril Fatface">Abril Fatface (expressiva)</option>
+            <option value="Cinzel">Cinzel (teatral)</option>
+          </select>
+        </div>
+        <div id="fontPreviewText" style="margin-top:12px;font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1.2;transition:font-family 0.3s">Associació de Teatre</div>
+      </div>
+
       <button class="btn btn-primary" style="width:100%;padding:16px;font-size:1rem" onclick="saveAppSettings()">💾 Desar configuració</button>
 
       <div id="socialPreview" style="display:none;margin-top:16px;background:var(--surface);border-radius:var(--radius);padding:16px;border:1px solid rgba(255,255,255,0.06)">
         <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">Enllaços actius:</div>
         <div id="socialLinks" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- MIGRAR (dins admin) -->
+    <div id="adminMigrate" style="display:none">
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
+        Desplaça totes les tasques i actes al nou any mantenint la proporció respecte al <strong style="color:var(--accent)">Dijous Sant</strong>.
+      </p>
+      <div id="easterCards" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
+      <div style="background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid rgba(255,255,255,0.06);margin-bottom:16px">
+        <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px;font-weight:500">Selecciona l'any destí</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:20px">
+          <button class="cal-btn" onclick="changeTargetYear(-1)">‹</button>
+          <div style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="targetYearDisplay"></div>
+          <button class="cal-btn" onclick="changeTargetYear(1)">›</button>
+        </div>
+        <div id="migrationPreview" style="font-size:0.82rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:18px"></div>
+        <button class="btn btn-primary" id="btnMigrate" style="width:100%;padding:16px;font-size:1rem" onclick="openMigrateConfirm()">
+          🔄 Migrar al <span id="btnYearLabel"></span>
+        </button>
+      </div>
+      <div style="background:rgba(232,184,109,0.06);border:1px solid rgba(232,184,109,0.2);border-radius:14px;padding:14px 16px">
+        <div style="font-size:0.78rem;color:var(--accent);font-weight:500;margin-bottom:6px">ℹ️ Com funciona</div>
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.7">Es calcula la diferència de dies entre el Dijous Sant de l'any base i el de l'any destí. Totes les dates es desplacen aquest nombre de dies. Les tasques completades no es migren.</div>
       </div>
     </div>
 
@@ -898,9 +931,11 @@ function bootApp(cfg) {
   window.switchAdminTab = function(tab, el) {
     document.getElementById('adminUsers').style.display    = tab==='users'    ? '' : 'none';
     document.getElementById('adminSettings').style.display = tab==='settings' ? '' : 'none';
+    document.getElementById('adminMigrate').style.display  = tab==='migrate'  ? '' : 'none';
     document.querySelectorAll('#section-admin .filter-chip').forEach(c=>c.classList.remove('active'));
     el.classList.add('active');
     if (tab==='settings') loadAppSettingsForm(db);
+    if (tab==='migrate')  renderMigrateSection();
   };
 
   // ── APP SETTINGS ───────────────────────────────────
@@ -917,18 +952,31 @@ function bootApp(cfg) {
         if (d.facebook)   document.getElementById('cfg-facebook').value   = d.facebook;
         if (d.web)        document.getElementById('cfg-web').value        = d.web;
         if (d.email)      document.getElementById('cfg-email').value      = d.email;
+        if (d.logoEmoji)  document.getElementById('cfg-logoEmoji').value  = d.logoEmoji;
+        if (d.font)       document.getElementById('cfg-font').value       = d.font;
+        if (d.logoEmoji || d.logo) {
+          const prev = document.getElementById('logoPreview');
+          if (prev) prev.innerHTML = d.logo ? `<img src="${d.logo}" style="width:100%;height:100%;object-fit:cover">` : d.logoEmoji;
+        }
+        if (d.font) { previewFont(d.font); }
         renderSocialPreview(d);
       }
     } catch(e) {}
   }
 
   function applySettingsToUI(d) {
-    if (d.appName) {
-      document.title = d.appName;
+    const logoStr = d.logo ? `<img src="${d.logo}" style="width:28px;height:28px;border-radius:6px;object-fit:cover">` : (d.logoEmoji || '🎭');
+    if (d.appName || d.logoEmoji || d.logo) {
+      document.title = d.appName || 'Associació de Teatre';
       const t = document.querySelector('.header-title');
-      if (t) t.innerHTML = `🎭 <span>${d.appName}</span>`;
+      if (t) t.innerHTML = `${logoStr} <span>${d.appName || 'Teatre'}</span>`;
       const lt = document.querySelector('.login-title');
-      if (lt) lt.innerHTML = `${d.appName.split(' ').slice(0,-1).join(' ')}<br><span>${d.appName.split(' ').slice(-1)}</span>`;
+      if (lt) {
+        const parts = (d.appName || 'Associació de Teatre').split(' ');
+        lt.innerHTML = `${parts.slice(0,-1).join(' ')}<br><span>${parts.slice(-1)}</span>`;
+      }
+      const loginLogo = document.querySelector('.login-logo');
+      if (loginLogo) loginLogo.innerHTML = d.logo ? `<img src="${d.logo}" style="width:64px;height:64px;border-radius:16px;object-fit:cover">` : (d.logoEmoji || '🎭');
     }
     if (d.welcome) {
       const lsub = document.querySelector('.login-sub');
@@ -936,6 +984,16 @@ function bootApp(cfg) {
     }
     if (d.accent)  document.documentElement.style.setProperty('--accent',  d.accent);
     if (d.accent2) document.documentElement.style.setProperty('--accent2', d.accent2);
+    if (d.font) {
+      const link = document.getElementById('dynamicFont');
+      const fontEncoded = d.font.replace(/ /g, '+');
+      if (link) link.href = `https://fonts.googleapis.com/css2?family=${fontEncoded}:wght@400;700;900&display=swap`;
+      document.querySelectorAll('.header-title, .section-title, .cal-month, .login-title, .modal-title, .stat-num, .cal-events-title, #targetYearDisplay').forEach(el => {
+        el.style.fontFamily = `'${d.font}', serif`;
+      });
+      const fp = document.getElementById('fontPreviewText');
+      if (fp) fp.style.fontFamily = `'${d.font}', serif`;
+    }
     renderSocialPreview(d);
   }
 
@@ -972,19 +1030,52 @@ function bootApp(cfg) {
   window.saveAppSettings = async function() {
     if (!isAdmin()) return;
     const settings = {
-      appName:   document.getElementById('cfg-appName').value.trim(),
-      welcome:   document.getElementById('cfg-welcome').value.trim(),
-      accent:    document.getElementById('cfg-accent').value,
-      accent2:   document.getElementById('cfg-accent2').value,
-      instagram: document.getElementById('cfg-instagram').value.trim(),
-      facebook:  document.getElementById('cfg-facebook').value.trim(),
-      web:       document.getElementById('cfg-web').value.trim(),
-      email:     document.getElementById('cfg-email').value.trim(),
-      updatedAt: serverTimestamp()
+      appName:    document.getElementById('cfg-appName').value.trim(),
+      welcome:    document.getElementById('cfg-welcome').value.trim(),
+      accent:     document.getElementById('cfg-accent').value,
+      accent2:    document.getElementById('cfg-accent2').value,
+      instagram:  document.getElementById('cfg-instagram').value.trim(),
+      facebook:   document.getElementById('cfg-facebook').value.trim(),
+      web:        document.getElementById('cfg-web').value.trim(),
+      email:      document.getElementById('cfg-email').value.trim(),
+      logoEmoji:  document.getElementById('cfg-logoEmoji').value.trim(),
+      logo:       window._pendingLogo || '',
+      font:       document.getElementById('cfg-font').value,
+      updatedAt:  serverTimestamp()
     };
     await setDoc(doc(db,'appConfig','main'), settings);
     applySettingsToUI(settings);
     showToast('✅ Configuració desada!');
+  };
+
+  // Logo upload handler
+  window.handleLogoUpload = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 200000) { showToast('⚠️ Imatge massa gran (màx 200KB)'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      window._pendingLogo = e.target.result;
+      const prev = document.getElementById('logoPreview');
+      if (prev) prev.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.previewEmoji = function(val) {
+    const prev = document.getElementById('logoPreview');
+    if (prev && val) prev.innerHTML = val;
+    else if (prev) prev.innerHTML = '🎭';
+  };
+
+  window.previewFont = function(fontName) {
+    const link = document.getElementById('dynamicFont');
+    if (link) {
+      const fontEncoded = fontName.replace(/ /g, '+');
+      link.href = `https://fonts.googleapis.com/css2?family=${fontEncoded}:wght@400;700;900&display=swap`;
+    }
+    const fp = document.getElementById('fontPreviewText');
+    if (fp) fp.style.fontFamily = `'${fontName}', serif`;
   };
 
   // Load settings on boot and subscribe to changes
@@ -1079,7 +1170,6 @@ function bootApp(cfg) {
     document.getElementById(`section-${tab}`).classList.add('active');
     document.getElementById(`tab-${tab}`).classList.add('active');
     if (tab==='calendar') renderCalendar();
-    if (tab==='migrate')  renderMigrateSection();
   };
 
   // ── SHOW MAIN ──────────────────────────────────────
